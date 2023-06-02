@@ -21,6 +21,7 @@ typedef struct _INVEPT_DESC
 //////////////////////////////////////////////////
 
 // Invept Functions
+// Invept函数（用于使EPT失效）
 unsigned char Invept(UINT32 Type, INVEPT_DESC* Descriptor);
 unsigned char InveptAllContexts();
 unsigned char InveptSingleContext(UINT64 EptPonter);

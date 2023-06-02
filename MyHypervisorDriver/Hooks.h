@@ -80,6 +80,7 @@ NTSTATUS(*NtCreateFileOrig)(
 // ----------------------------------------------------------------------
 
 // A test function for Syscall hook
+// Syscall钩住的测试函数
 VOID SyscallHookTest();
 
 
@@ -97,4 +98,5 @@ PVOID(*ExAllocatePoolWithTagOrig)(
 // ----------------------------------------------------------------------
 
 // A test function for hidden hooks
+// 隐藏钩住的测试函数
 VOID HiddenHooksTest();

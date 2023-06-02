@@ -8,12 +8,15 @@
 //////////////////////////////////////////////////
 
 // VMCS Region Size
+// VMCS区域的大小
 #define VMCS_SIZE   4096
 
 // VMXON Region Size
+// VMXON区域的大小
 #define VMXON_SIZE   4096
 
 // PIN-Based Execution
+// 基于PIN的执行
 #define PIN_BASED_VM_EXECUTION_CONTROLS_EXTERNAL_INTERRUPT        0x00000001
 #define PIN_BASED_VM_EXECUTION_CONTROLS_NMI_EXITING               0x00000008
 #define PIN_BASED_VM_EXECUTION_CONTROLS_VIRTUAL_NMI               0x00000020
@@ -21,6 +24,7 @@
 #define PIN_BASED_VM_EXECUTION_CONTROLS_PROCESS_POSTED_INTERRUPTS 0x00000080
 
 // CPU-Based Controls
+// 基于CPU的控制（CPU-Based Controls）
 #define CPU_BASED_VIRTUAL_INTR_PENDING        0x00000004
 #define CPU_BASED_USE_TSC_OFFSETING           0x00000008
 #define CPU_BASED_HLT_EXITING                 0x00000080
@@ -44,6 +48,7 @@
 #define CPU_BASED_ACTIVATE_SECONDARY_CONTROLS 0x80000000
 
 // Secondary CPU-Based Controls
+// 辅助CPU-Based控制（Secondary CPU-Based Controls）
 #define CPU_BASED_CTL2_ENABLE_EPT						0x2
 #define CPU_BASED_CTL2_RDTSCP							0x8
 #define CPU_BASED_CTL2_ENABLE_VPID						0x20
@@ -54,18 +59,21 @@
 #define CPU_BASED_CTL2_ENABLE_XSAVE_XRSTORS				0x100000
 
 // VM-exit Control Bits 
+// VM-exit控制位（VM-exit Control Bits）
 #define VM_EXIT_IA32E_MODE              0x00000200
 #define VM_EXIT_ACK_INTR_ON_EXIT        0x00008000
 #define VM_EXIT_SAVE_GUEST_PAT          0x00040000
 #define VM_EXIT_LOAD_HOST_PAT           0x00080000
 
 // VM-entry Control Bits 
+// VM-entry控制位（VM-entry Control Bits）
 #define VM_ENTRY_IA32E_MODE             0x00000200
 #define VM_ENTRY_SMM                    0x00000400
 #define VM_ENTRY_DEACT_DUAL_MONITOR     0x00000800
 #define VM_ENTRY_LOAD_GUEST_PAT         0x00004000
 
 // VM-exit Reasons
+// VM-exit原因（VM-exit Reasons）
 #define EXIT_REASON_EXCEPTION_NMI					 0
 #define EXIT_REASON_EXTERNAL_INTERRUPT				 1
 #define EXIT_REASON_TRIPLE_FAULT					 2
@@ -128,6 +136,7 @@
 #define EXIT_REASON_PCOMMIT						     65
 
 // CPUID RCX(s) - Based on Hyper-V
+// 基于Hyper-V的CPUID RCX(s)
 #define HYPERV_CPUID_VENDOR_AND_MAX_FUNCTIONS   0x40000000
 #define HYPERV_CPUID_INTERFACE                  0x40000001
 #define HYPERV_CPUID_VERSION                    0x40000002
@@ -139,12 +148,14 @@
 #define HYPERV_CPUID_MAX                        0x4000ffff
 
 // Exit Qualifications for MOV for Control Register Access
+// MOV指令控制寄存器访问的退出限定条件（Exit Qualifications）
 #define TYPE_MOV_TO_CR              0
 #define TYPE_MOV_FROM_CR            1
 #define TYPE_CLTS                   2
 #define TYPE_LMSW                   3
 
 // Stack size
+// 栈大小（Stack size）
 #define VMM_STACK_SIZE      0x8000
 
 
@@ -313,8 +324,11 @@ typedef enum _VMCS_FIELDS {
 
 typedef struct _VMX_VMXOFF_STATE
 {
+    // 显示VMXOFF是否执行的状态
 	BOOLEAN IsVmxoffExecuted;					// Shows whether the VMXOFF executed or not
+    // 返回客户的RIP地址
 	UINT64  GuestRip;							// Rip address of guest to return
+    // 返回客户的RSP地址
 	UINT64  GuestRsp;							// Rsp address of guest to return
 
 } VMX_VMXOFF_STATE, * PVMX_VMXOFF_STATE;
@@ -322,17 +336,29 @@ typedef struct _VMX_VMXOFF_STATE
 
 typedef struct _VIRTUAL_MACHINE_STATE
 {
+    // 检测当前逻辑核心是否在VMX根模式下执行
 	BOOLEAN IsOnVmxRootMode;										// Detects whether the current logical core is on Executing on VMX Root Mode
-	BOOLEAN IncrementRip;											// Checks whether it has to redo the previous instruction or not (it used mainly in Ept routines)
-	BOOLEAN HasLaunched;											// Indicate whether the core is virtualized or not
-	UINT64 VmxonRegionPhysicalAddress;								// Vmxon region physical address
-	UINT64 VmxonRegionVirtualAddress;							    // VMXON region virtual address
-	UINT64 VmcsRegionPhysicalAddress;								// VMCS region physical address
-	UINT64 VmcsRegionVirtualAddress;								// VMCS region virtual address
-	UINT64 VmmStack;												// Stack for VMM in VM-Exit State
-	UINT64 MsrBitmapVirtualAddress;									// Msr Bitmap Virtual Address
-	UINT64 MsrBitmapPhysicalAddress;								// Msr Bitmap Physical Address
-	VMX_VMXOFF_STATE VmxoffState;									// Shows the vmxoff state of the guest
+    // 检查是否需要重新执行前一条指令（主要在Ept例程中使用）
+    BOOLEAN IncrementRip;											// Checks whether it has to redo the previous instruction or not (it used mainly in Ept routines)
+	// 指示核心是否虚拟化的状态
+    BOOLEAN HasLaunched;											// Indicate whether the core is virtualized or not
+    // Vmxon区域的物理地址
+    UINT64 VmxonRegionPhysicalAddress;								// Vmxon region physical address
+	// Vmxon区域的虚拟地址
+    UINT64 VmxonRegionVirtualAddress;							    // VMXON region virtual address
+	// VMCS区域的物理地址
+    UINT64 VmcsRegionPhysicalAddress;								// VMCS region physical address
+	// VMCS区域的虚拟地址
+    UINT64 VmcsRegionVirtualAddress;								// VMCS region virtual address
+	// VMM在VM-Exit状态下的堆栈
+    UINT64 VmmStack;												// Stack for VMM in VM-Exit State
+    // Msr Bitmap的虚拟地址
+    UINT64 MsrBitmapVirtualAddress;									// Msr Bitmap Virtual Address
+	// Msr Bitmap的物理地址
+    UINT64 MsrBitmapPhysicalAddress;								// Msr Bitmap Physical Address
+	// 显示客户的VMXOFF状态
+    VMX_VMXOFF_STATE VmxoffState;									// Shows the vmxoff state of the guest
+    // 它显示了应在MTF vm-exit中还原的钩住页面的详细信息
     PEPT_HOOKED_PAGE_DETAIL MtfEptHookRestorePoint;                 // It shows the detail of the hooked paged that should be restore in MTF vm-exit
 } VIRTUAL_MACHINE_STATE, * PVIRTUAL_MACHINE_STATE;
 
@@ -379,18 +405,22 @@ typedef union _MOV_CR_QUALIFICATION
 //////////////////////////////////////////////////
 
 // Initialize VMX Operation
+// 初始化VMX操作
 BOOLEAN VmxInitializer();
 
 // Terminate VMX Operation
+// 终止VMX操作
 BOOLEAN VmxTerminate();
 
 // Allocate VMX Regions
+// 分配VMX区域
 BOOLEAN VmxAllocateVmxonRegion(VIRTUAL_MACHINE_STATE* CurrentGuestState);
 BOOLEAN VmxAllocateVmcsRegion(VIRTUAL_MACHINE_STATE* CurrentGuestState);
 BOOLEAN VmxAllocateVmmStack(INT ProcessorID);
 BOOLEAN VmxAllocateMsrBitmap(INT ProcessorID);
 
 // VMX Instructions
+// VMX指令
 VOID VmxVmptrst();
 VOID VmxVmresume();
 VOID VmxVmxoff();
@@ -399,7 +429,9 @@ BOOLEAN VmxLoadVmcs(VIRTUAL_MACHINE_STATE* CurrentGuestState);
 BOOLEAN VmxClearVmcsState(VIRTUAL_MACHINE_STATE* CurrentGuestState);
 
 // Virtualize an already running machine 
+// 虚拟化一个已经运行的机器
 BOOLEAN VmxVirtualizeCurrentSystem(PVOID GuestStack);
 
 // Configure VMCS
+// 配置VMCS（Virtual Machine Control Structure）
 BOOLEAN VmxSetupVmcs(VIRTUAL_MACHINE_STATE* CurrentGuestState, PVOID GuestStack);

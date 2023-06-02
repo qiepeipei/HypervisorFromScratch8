@@ -3,7 +3,7 @@
 #include <wdf.h>
 #include <wdm.h>
 // This file is for implementing WPP Software Tracing
-
+// 该文件用于实现WPP软件跟踪
 
 
 //////////////////////////////////////////////////
@@ -20,12 +20,12 @@
         )                             
 
 
-#define TRACE_LEVEL_NONE        0   // Tracing is not on
-#define TRACE_LEVEL_FATAL       1   // Abnormal exit or termination
-#define TRACE_LEVEL_ERROR       2   // Severe errors that need logging
-#define TRACE_LEVEL_WARNING     3   // Warnings such as allocation failure
-#define TRACE_LEVEL_INFORMATION 4   // Includes non-error cases(for example, Entry-Exit)
-#define TRACE_LEVEL_VERBOSE     5   // Detailed traces from intermediate steps
+#define TRACE_LEVEL_NONE        0   // Tracing is not on // 跟踪功能已关闭
+#define TRACE_LEVEL_FATAL       1   // Abnormal exit or termination // 异常退出或终止
+#define TRACE_LEVEL_ERROR       2   // Severe errors that need logging // 需要记录的严重错误
+#define TRACE_LEVEL_WARNING     3   // Warnings such as allocation failure // 警告，例如分配失败
+#define TRACE_LEVEL_INFORMATION 4   // Includes non-error cases(for example, Entry-Exit) // 包括非错误情况（例如，进入-退出）
+#define TRACE_LEVEL_VERBOSE     5   // Detailed traces from intermediate steps // 详细跟踪中间步骤
 #define TRACE_LEVEL_RESERVED6   6
 #define TRACE_LEVEL_RESERVED7   7
 #define TRACE_LEVEL_RESERVED8   8
@@ -43,6 +43,11 @@
 // this event in the macro are the Levels defined in evntrace.h and the flags 
 // defined above and are evaluated by the macro WPP_LEVEL_FLAGS_ENABLED below. 
 // 
+
+// DoTraceLevelMessage是一个自定义宏，为默认的DoTraceMessage添加了级别支持，而默认的DoTraceMessage仅支持标志。
+// 在此版本中，标志和级别都是生成跟踪消息的条件。通过在源文件的RUN_WPP行中使用-func参数，预处理器会识别该函数。
+// 在源文件中，您会找到-func:DoTraceLevelMessage(LEVEL,FLAGS,MSG,...)。
+// 触发该宏中事件的条件是evntrace.h中定义的级别和上面定义的标志，并由下面的宏WPP_LEVEL_FLAGS_ENABLED进行评估。
 #define WPP_LEVEL_FLAGS_LOGGER(level,flags) WPP_LEVEL_LOGGER(flags)
 #define WPP_LEVEL_FLAGS_ENABLED(level, flags) (WPP_LEVEL_ENABLED(flags) && WPP_CONTROL(WPP_BIT_ ## flags).Level >= level)
 
@@ -85,18 +90,22 @@
 // PRE macro: The name of the macro includes the condition arguments FLAGS and EXP
 //            define in FUNC above
 //
+// PRE宏：宏的名称包括在上面的FUNC中定义的条件参数FLAGS和EXP
 #define WPP_FLAG_EXP_PRE(FLAGS, HR) {if (HR != STATUS_SUCCESS) {
 
 //
 // POST macro
 // The name of the macro includes the condition arguments FLAGS and EXP
 //            define in FUNC above
+// POST宏
+// 宏的名称包括在上面的FUNC中定义的条件参数FLAGS和EXP
 #define WPP_FLAG_EXP_POST(FLAGS, HR) ;}}
 
 // 
 // The two macros below are for checking if the event should be logged and for 
 // choosing the logger handle to use when calling the ETW trace API
 //
+// 下面的两个宏用于检查是否应记录事件，并在调用ETW跟踪API时选择要使用的日志记录器句柄。
 #define WPP_FLAG_EXP_ENABLED(FLAGS, HR) WPP_FLAG_ENABLED(FLAGS)
 #define WPP_FLAG_EXP_LOGGER(FLAGS, HR) WPP_FLAG_LOGGER(FLAGS)
 

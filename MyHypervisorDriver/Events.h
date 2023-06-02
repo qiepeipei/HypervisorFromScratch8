@@ -107,6 +107,7 @@ typedef struct _EVENT_INFORMATION
 //////////////////////////////////////////////////
 
 // Inject #BP to the guest (Event Injection) 
+// 向客户端注入#BP异常（事件注入）
 VOID EventInjectBreakpoint();
 VOID EventInjectInterruption(INTERRUPT_TYPE InterruptionType, EXCEPTION_VECTORS Vector, BOOLEAN DeliverErrorCode, ULONG32 ErrorCode);
 VOID EventInjectGeneralProtection();
