@@ -2,5 +2,4 @@
 Build
 MyHypervisorApp/Debug
 MyHypervisorApp/Release
-MyHypervisorDriver/Debug
-MyHypervisorDriver/Release
+MyHypervisorDriver/x64
