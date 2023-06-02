@@ -8,6 +8,7 @@
 
 
 /* Hook function that HooksExAllocatePoolWithTag */
+/* 钩取函数，钩取ExAllocatePoolWithTag函数 */
 PVOID ExAllocatePoolWithTagHook(
 	POOL_TYPE	PoolType,
 	SIZE_T      NumberOfBytes,
@@ -21,6 +22,7 @@ PVOID ExAllocatePoolWithTagHook(
 /***********************************************************************/
 
 /* Make examples for testing hidden hooks */
+/* 创建用于测试隐藏钩子的示例 */
 VOID HiddenHooksTest()
 {
 	// Hook Test

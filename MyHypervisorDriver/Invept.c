@@ -2,6 +2,7 @@
 #include "InlineAsm.h"
 
 /* Invoke the Invept instruction */
+/* 调用Invept指令 */
 unsigned char Invept(UINT32 Type, INVEPT_DESC* Descriptor)
 {
 	if (!Descriptor)
@@ -14,6 +15,7 @@ unsigned char Invept(UINT32 Type, INVEPT_DESC* Descriptor)
 }
 
 /* Invalidates a single context in ept cache table */
+/* 使EPT缓存表中的单个上下文失效 */
 unsigned char InveptSingleContext(UINT64 EptPointer)
 {
 	INVEPT_DESC Descriptor = { 0 };
@@ -23,6 +25,7 @@ unsigned char InveptSingleContext(UINT64 EptPointer)
 }
 
 /* Invalidates all contexts in ept cache table */
+/* 使EPT缓存表中的所有上下文失效 */
 unsigned char InveptAllContexts()
 {
 	return Invept(INVEPT_ALL_CONTEXTS, NULL);

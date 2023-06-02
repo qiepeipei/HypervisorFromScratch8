@@ -36,7 +36,7 @@ AsmReloadGdtr PROC
 	push	rcx
 	shl		rdx, 48
 	push	rdx
-	lgdt	fword ptr [rsp+6]	; do not try to modify stack selector with this ;)
+	lgdt	fword ptr [rsp+6]	; do not try to modify stack selector with this ;) ;不要尝试使用此指令修改堆栈选择器 ;)
 	pop		rax
 	pop		rax
 	ret

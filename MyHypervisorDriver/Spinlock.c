@@ -39,6 +39,7 @@ void SpinlockLock(volatile LONG* Lock)
 
 		// Don't call "pause" too many times. If the wait becomes too big,
 		// clamp it to the max_wait.
+        // 不要过多地调用"pause"。如果等待时间过长，将其限制为最大等待时间。
 
 		if (wait * 2 > max_wait)
 		{

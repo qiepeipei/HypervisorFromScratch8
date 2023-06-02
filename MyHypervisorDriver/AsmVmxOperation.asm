@@ -28,6 +28,8 @@ AsmVmxVmcall PROC
     
     ; We change r10 to HVFS Hex ASCII and r11 to VMCALL Hex ASCII and r12 to NOHYPERV Hex ASCII so we can make sure that the calling Vmcall comes
     ; from our hypervisor and we're resposible for managing it, otherwise it has to be managed by Hyper-V
+    ; 我们将r10更改为HVFS的Hex ASCII，将r11更改为VMCALL的Hex ASCII，将r12更改为NOHYPERV的Hex ASCII，
+    ;以确保调用Vmcall是来自我们的虚拟化程序，否则应由Hyper-V进行管理
     pushfq
     push    r10
     push    r11

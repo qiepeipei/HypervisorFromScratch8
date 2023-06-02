@@ -5,6 +5,7 @@
 #include "Logging.h"
 
 /* Get the kernel base and Image size */
+/* 获取内核基址和镜像大小 */
 PVOID SyscallHookGetKernelBase(PULONG pImageSize)
 {
 	NTSTATUS status;
@@ -63,6 +64,7 @@ PVOID SyscallHookGetKernelBase(PULONG pImageSize)
 }
 
 /* Find SSDT address of Nt fucntions and W32Table */
+/* 查找Nt函数和W32Table的SSDT地址 */
 BOOLEAN SyscallHookFindSsdt(PUINT64 NtTable, PUINT64 Win32kTable)
 {
 	ULONG kernelSize = 0;
@@ -123,6 +125,7 @@ BOOLEAN SyscallHookFindSsdt(PUINT64 NtTable, PUINT64 Win32kTable)
 }
 
 /* Find entry from SSDT table of Nt fucntions and W32Table syscalls */
+/* 从Nt函数和W32Table系统调用的SSDT表中查找条目 */
 PVOID SyscallHookGetFunctionAddress(INT32 ApiNumber, BOOLEAN GetFromWin32k)
 {
 	SSDTStruct* SSDT;
@@ -132,6 +135,7 @@ PVOID SyscallHookGetFunctionAddress(INT32 ApiNumber, BOOLEAN GetFromWin32k)
 	UINT64 NtTable, Win32kTable;
 
 	// Read the address og SSDT
+    // 读取SSDT的地址
 	Result = SyscallHookFindSsdt(&NtTable, &Win32kTable);
 
 	if (!Result)
@@ -164,6 +168,7 @@ PVOID SyscallHookGetFunctionAddress(INT32 ApiNumber, BOOLEAN GetFromWin32k)
 
 
 /* Hook function that hooks NtCreateFile */
+/* 钩取函数，钩取NtCreateFile函数 */
 NTSTATUS NtCreateFileHook(
 	PHANDLE            FileHandle,
 	ACCESS_MASK        DesiredAccess,
@@ -219,11 +224,14 @@ NTSTATUS NtCreateFileHook(
 
 
 /* Make examples for testing hidden hooks */
+/* 创建用于测试隐藏钩子的示例 */
 VOID SyscallHookTest() {
 
 	// Note that this syscall number is only valid for Windows 10 1909, you have to find the syscall number of NtCreateFile based on
 	// Your Windows version, please visit https://j00ru.vexillium.org/syscalls/nt/64/ for finding NtCreateFile's Syscall number for your Windows.
-	
+
+    // 请注意，此系统调用号仅适用于Windows 10 1909版本，您必须根据您的Windows版本找到NtCreateFile的系统调用号。
+    // 请访问https://j00ru.vexillium.org/syscalls/nt/64/以查找适用于您的Windows版本的NtCreateFile的系统调用号。
 	INT32 ApiNumberOfNtCreateFile = 0x0055;
 	PVOID ApiLocationFromSSDTOfNtCreateFile = SyscallHookGetFunctionAddress(ApiNumberOfNtCreateFile, FALSE);
 

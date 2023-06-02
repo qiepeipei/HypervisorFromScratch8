@@ -9,6 +9,7 @@
 
 
 /* Main Vmexit events handler */
+/* Ö÷ÒªµÄVMexitÊÂ¼ş´¦Àí³ÌĞò */
 BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 {
 	int CurrentProcessorIndex;
@@ -21,10 +22,11 @@ BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 	ULONG ExitInstructionLength;
 
 	/*********** SEND MESSAGE AFTER WE SET THE STATE ***********/
-
+    /*********** ÔÚÉèÖÃ×´Ì¬ºó·¢ËÍÏûÏ¢ ***********/
 	CurrentProcessorIndex = KeGetCurrentProcessorNumber();
 
 	// Indicates we are in Vmx root mode in this logical core
+    // ±íÊ¾µ±Ç°Âß¼­ºËĞÄ´¦ÓÚVMX¸ùÄ£Ê½ÏÂ
 	GuestState[CurrentProcessorIndex].IsOnVmxRootMode = TRUE;
 
 	GuestState[CurrentProcessorIndex].IncrementRip = TRUE;
@@ -38,6 +40,7 @@ BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 
 
 	// Debugging purpose
+	// ½öÓÃÓÚµ÷ÊÔÄ¿µÄ
 	//LogInfo("VM_EXIT_REASON : 0x%x", ExitReason);
 	//LogInfo("EXIT_QUALIFICATION : 0x%llx", ExitQualification);
 
@@ -54,6 +57,9 @@ BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 	// The following instructions cause VM exits when they are executed in VMX non-root operation: CPUID, GETSEC,
 	// INVD, and XSETBV. This is also true of instructions introduced with VMX, which include: INVEPT, INVVPID, 
 	// VMCALL, VMCLEAR, VMLAUNCH, VMPTRLD, VMPTRST, VMRESUME, VMXOFF, and VMXON.
+    // 25.1.2 ÒıÆğÎŞÌõ¼şVMÍË³öµÄÖ¸Áî
+    // ÏÂÁĞÖ¸ÁîÔÚVMX·Ç¸ù²Ù×÷ÖĞÖ´ĞĞÊ±»áµ¼ÖÂVMÍË³ö£ºCPUID¡¢GETSEC¡¢INVDºÍXSETBV¡£
+	// ¶ÔÓÚÒıÈëVMXµÄÖ¸ÁîÒ²ÊÇÈç´Ë£¬ÕâĞ©Ö¸Áî°üÀ¨£ºINVEPT¡¢INVVPID¡¢VMCALL¡¢VMCLEAR¡¢VMLAUNCH¡¢VMPTRLD¡¢VMPTRST¡¢VMRESUME¡¢VMXOFFºÍVMXON
 
 	case EXIT_REASON_VMCLEAR:
 	case EXIT_REASON_VMPTRLD:
@@ -110,6 +116,7 @@ BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 	{
 
 		// Reading guest physical address
+        // ¶ÁÈ¡¿Í»§»úÎïÀíµØÖ·
 		GuestPhysicalAddr = 0;
 		__vmx_vmread(GUEST_PHYSICAL_ADDRESS, &GuestPhysicalAddr);
 
@@ -133,14 +140,17 @@ BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 	case EXIT_REASON_VMCALL:
 	{
 		// Check if it's our routines that request the VMCALL our it relates to Hyper-V
+        // ¼ì²éÊÇ·ñÊÇÎÒÃÇµÄÀı³ÌÇëÇóÁËVMCALL£¬»òÕßÓëHyper-VÏà¹Ø
 		if (GuestRegs->r10 == 0x48564653 && GuestRegs->r11 == 0x564d43414c4c && GuestRegs->r12 == 0x4e4f485950455256)
 		{
 			// Then we have to manage it as it relates to us
+            // ÄÇÃ´ÎÒÃÇ±ØĞë½«ÆäÊÓÎªÓëÎÒÃÇÏà¹ØµÄÄÚÈİ½øĞĞ¹ÜÀí
 			GuestRegs->rax = VmxVmcallHandler(GuestRegs->rcx, GuestRegs->rdx, GuestRegs->r8, GuestRegs->r9);
 		}
 		else
 		{
 			// Otherwise let the top-level hypervisor to manage it
+            // ·ñÔò£¬ÈÃ¶¥¼¶ĞéÄâ»¯¹ÜÀí³ÌĞòÀ´´¦ÀíËü
 			GuestRegs->rax = AsmHypervVmcall(GuestRegs->rcx, GuestRegs->rdx, GuestRegs->r8);
 		}
 		break;
@@ -151,14 +161,24 @@ BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 
 		Exception or non-maskable interrupt (NMI). Either:
 			1: Guest software caused an exception and the bit in the exception bitmap associated with exception’s vector was set to 1
-			2: An NMI was delivered to the logical processor and the “NMI exiting” VM-execution control was 1.
+			2: An NMI was delivered to the logical processor and the “NMI exiting?VM-execution control was 1.
 
 		VM_EXIT_INTR_INFO shows the exit infromation about event that occured and causes this exit
 		Don't forget to read VM_EXIT_INTR_ERROR_CODE in the case of re-injectiong event
 
 		*/
 
+        /* Òì³£»ò²»¿ÉÆÁ±ÎÖĞ¶Ï£¨NMI£©¡£¿ÉÄÜÓĞÒÔÏÂÁ½ÖÖÇé¿öÖ®Ò»£º
+		1£º¿Í»§»úÈí¼şµ¼ÖÂÒì³££¬ÓëÒì³£ÏòÁ¿Ïà¹ØÁªµÄÒì³£Î»Í¼ÖĞµÄÎ»ÉèÖÃÎª1¡£
+		2£ºÂß¼­´¦ÀíÆ÷½ÓÊÕµ½NMI£¬²¢ÇÒ¡°NMI exiting¡±VMÖ´ĞĞ¿ØÖÆÎ»Îª1¡£
+
+		VM_EXIT_INTR_INFOÏÔÊ¾ÁËµ¼ÖÂ´ËÍË³öµÄÊÂ¼şµÄÍË³öĞÅÏ¢¡£
+		ÔÚÖØĞÂ×¢ÈëÊÂ¼şµÄÇé¿öÏÂ£¬²»ÒªÍü¼Ç¶ÁÈ¡VM_EXIT_INTR_ERROR_CODE¡£
+
+		*/
+
 		// read the exit reason
+        // ¶ÁÈ¡ÍË³öÔ­Òò
 		__vmx_vmread(VM_EXIT_INTR_INFO, &InterruptExit);
 
 		if (InterruptExit.InterruptionType == INTERRUPT_TYPE_SOFTWARE_EXCEPTION && InterruptExit.Vector == EXCEPTION_VECTOR_BREAKPOINT)
@@ -166,14 +186,17 @@ BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 
 			ULONG64 GuestRip;
 			// Reading guest's RIP 
+			// ¶ÁÈ¡¿Í»§»úµÄRIP
 			__vmx_vmread(GUEST_RIP, &GuestRip);
 
 			// Send the user
+            // ·¢ËÍ¸øÓÃ»§
 			LogInfo("Breakpoint Hit (Process Id : 0x%x) at : %llx ", PsGetCurrentProcessId(), GuestRip);
 
 			GuestState[CurrentProcessorIndex].IncrementRip = FALSE;
 
 			// re-inject #BP back to the guest
+            // ÖØĞÂ×¢Èë#BPÖĞ¶Ï¸ø¿Í»§»ú
 			EventInjectBreakpoint();
 
 		}
@@ -186,11 +209,14 @@ BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 	case EXIT_REASON_MONITOR_TRAP_FLAG:
 	{
 		/* Monitor Trap Flag */
+        /* ¼àÊÓÏİÚå±êÖ¾£¨Trap Flag£© */
 		if (GuestState[CurrentProcessorIndex].MtfEptHookRestorePoint)
 		{
 			// Restore the previous state
+            // »Ö¸´ÏÈÇ°µÄ×´Ì¬
 			EptHandleMonitorTrapFlag(GuestState[CurrentProcessorIndex].MtfEptHookRestorePoint);
 			// Set it to NULL
+            // ½«ÆäÉèÖÃÎªNULL
 			GuestState[CurrentProcessorIndex].MtfEptHookRestorePoint = NULL;
 		}
 		else
@@ -199,9 +225,11 @@ BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 		}
 
 		// Redo the instruction 
+		// ÖØĞÂÖ´ĞĞÖ¸Áî
 		GuestState[CurrentProcessorIndex].IncrementRip = FALSE;
 
 		// We don't need MTF anymore
+        // ÎÒÃÇ²»ÔÙĞèÒªMTF£¨Monitor Trap Flag£©
 		HvSetMonitorTrapFlag(FALSE);
 
 		break;
@@ -224,6 +252,7 @@ BOOLEAN VmxVmexitHandler(PGUEST_REGS GuestRegs)
 	}
 
 	// Set indicator of Vmx non root mode to false
+    // ½«Vmx·Ç¸ùÄ£Ê½µÄÖ¸Ê¾Æ÷ÉèÖÃÎªfalse
 	GuestState[CurrentProcessorIndex].IsOnVmxRootMode = FALSE;
 
 	if (GuestState[CurrentProcessorIndex].VmxoffState.IsVmxoffExecuted)

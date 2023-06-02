@@ -30,6 +30,7 @@ AsmVmxSaveState PROC
 
 	sub rsp, 0100h
 	; It a x64 FastCall function so the first parameter should go to rcx
+	; 这是一个x64 FastCall函数，因此第一个参数应该放在rcx寄存器中
 
 	mov rcx, rsp
 
@@ -37,7 +38,8 @@ AsmVmxSaveState PROC
 
 	int 3	; we should never reach here as we execute vmlaunch in the above function.
 			; if rax is FALSE then it's an indication of error
-
+			; 我们不应该到达这里，因为我们在上面的函数中执行了vmlaunch指令。
+			; 如果rax为FALSE，则表示出现错误的指示
 	jmp AsmVmxRestoreState
 		
 AsmVmxSaveState ENDP

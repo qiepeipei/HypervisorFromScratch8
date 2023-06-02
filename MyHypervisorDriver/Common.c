@@ -5,6 +5,7 @@
 #include "Vmx.h"
 
 /* Power function in order to computer address for MSR bitmaps */
+/* 用于计算MSR位图地址的幂函数 */
 int MathPower(int Base, int Exp) {
 
 	int result;
@@ -29,6 +30,8 @@ int MathPower(int Base, int Exp) {
 
 // This function is deprecated as we want to supporrt more than 32 processors.
 /* Broadcast a function to all logical cores */
+// 此函数已弃用，因为我们希望支持超过32个处理器。
+/* 将函数广播到所有逻辑核心 */
 BOOLEAN BroadcastToProcessors(ULONG ProcessorNumber, RunOnLogicalCoreFunc Routine)
 {
 
@@ -69,6 +72,7 @@ BOOLEAN BroadcastToProcessors(ULONG ProcessorNumber, RunOnLogicalCoreFunc Routin
 */
 
 /* Set Bits for a special address (used on MSR Bitmaps) */
+/* 设置特定地址的位（用于MSR位图） */
 void SetBit(PVOID Addr, UINT64 bit, BOOLEAN Set) {
 
 	UINT64 byte;
@@ -93,6 +97,7 @@ void SetBit(PVOID Addr, UINT64 bit, BOOLEAN Set) {
 }
 
 /* Get Bits of a special address (used on MSR Bitmaps) */
+/* 获取特定地址的位（用于MSR位图） */
 void GetBit(PVOID Addr, UINT64 bit) {
 
 	UINT64 byte, k;
@@ -109,12 +114,14 @@ void GetBit(PVOID Addr, UINT64 bit) {
 }
 
 /* Converts Virtual Address to Physical Address */
+/* 将虚拟地址转换为物理地址 */
 UINT64 VirtualAddressToPhysicalAddress(PVOID VirtualAddress)
 {
 	return MmGetPhysicalAddress(VirtualAddress).QuadPart;
 }
 
 /* Converts Physical Address to Virtual Address */
+/* 将物理地址转换为虚拟地址 */
 UINT64 PhysicalAddressToVirtualAddress(UINT64 PhysicalAddress)
 {
 	PHYSICAL_ADDRESS PhysicalAddr;
@@ -124,9 +131,11 @@ UINT64 PhysicalAddressToVirtualAddress(UINT64 PhysicalAddress)
 }
 
 /* Find cr3 of system process*/
+/* 查找系统进程的CR3值 */
 UINT64 FindSystemDirectoryTableBase()
 {
 	// Return CR3 of the system process.
+    // 返回系统进程的CR3值。
 	NT_KPROCESS* SystemProcess = (NT_KPROCESS*)(PsInitialSystemProcess);
 	return SystemProcess->DirectoryTableBase;
 }
