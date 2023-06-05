@@ -30,6 +30,7 @@ typedef struct _BUFFER_HEADER {
 } BUFFER_HEADER, * PBUFFER_HEADER;
 
 // Core-specific buffers
+// 特定于核心的缓冲区
 typedef struct _LOG_BUFFER_INFORMATION {
     // 缓冲区的起始地址
 	UINT64 BufferStartAddress;						// Start address of the buffer
