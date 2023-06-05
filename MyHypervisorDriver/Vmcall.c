@@ -4,6 +4,7 @@
 #include "Invept.h"
 
 /* Main Vmcall Handler */
+/* 主要的Vmcall处理程序 */
 NTSTATUS VmxVmcallHandler(UINT64 VmcallNumber, UINT64 OptionalParam1, UINT64 OptionalParam2, UINT64 OptionalParam3)
 {
 	NTSTATUS VmcallStatus;
@@ -13,6 +14,7 @@ NTSTATUS VmxVmcallHandler(UINT64 VmcallNumber, UINT64 OptionalParam1, UINT64 Opt
 	VmcallStatus = STATUS_UNSUCCESSFUL;
 
 	// Only 32bit of Vmcall is valid, this way we can use the upper 32 bit of the Vmcall
+    // 只有Vmcall的低32位有效，这样我们可以使用Vmcall的高32位。
 	switch (VmcallNumber & 0xffffffff)
 	{
 	case VMCALL_TEST:
@@ -27,9 +29,11 @@ NTSTATUS VmxVmcallHandler(UINT64 VmcallNumber, UINT64 OptionalParam1, UINT64 Opt
 		break;
 	}
 	// Mask is the upper 32 bits to this Vmcall
+    // 将掩码应用于Vmcall的高32位。
 	case VMCALL_CHANGE_PAGE_ATTRIB:
 	{
 		// Upper 32 bits of the Vmcall contains the attribute mask
+        // Vmcall的高32位包含属性掩码。
 		UINT32 AttributeMask = (UINT32)((VmcallNumber & 0xFFFFFFFF00000000LL) >> 32);;
 
 		UnsetExec = UnsetWrite = UnsetRead = FALSE;
@@ -97,6 +101,7 @@ NTSTATUS VmxVmcallHandler(UINT64 VmcallNumber, UINT64 OptionalParam1, UINT64 Opt
 }
 
 /* Test Vmcall (VMCALL_TEST) */
+/* 测试Vmcall（VMCALL_TEST） */
 NTSTATUS VmcallTest(UINT64 Param1, UINT64 Param2, UINT64 Param3) {
 
 	LogInfo("VmcallTest called with @Param1 = 0x%llx , @Param2 = 0x%llx , @Param3 = 0x%llx", Param1, Param2, Param3);

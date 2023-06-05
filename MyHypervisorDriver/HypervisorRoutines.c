@@ -540,61 +540,78 @@ UINT64 HvReturnInstructionPointerForVmxoff()
 VOID HvDpcBroadcastInitializeGuest(KDPC* Dpc, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2)
 {
 	// Save the vmx state and prepare vmcs setup and finally execute vmlaunch instruction
+    // 保存vmx状态并准备vmcs设置，最后执行vmlaunch指令
 	AsmVmxSaveState();
 
 	// Wait for all DPCs to synchronize at this point
+    // 在此处等待所有的延迟处理程序（DPC）同步
 	KeSignalCallDpcSynchronize(SystemArgument2);
 
 	// Mark the DPC as being complete
+    // 将延迟处理程序（DPC）标记为已完成
 	KeSignalCallDpcDone(SystemArgument1);
 }
 
 /* Terminate Vmx on all logical cores. */
+/* 在所有逻辑核心上终止Vmx。 */
 VOID HvTerminateVmx()
 {
 	// Remve All the hooks if any
+    // 如果有任何钩子，移除所有钩子。
 	HvPerformPageUnHookAllPages();
 
 	// Broadcast to terminate Vmx
+    // 广播终止Vmx命令。
 	KeGenericCallDpc(HvDpcBroadcastTerminateGuest, 0x0);
 	
 	/* De-allocatee global variables */
-	
+    /* 释放全局变量的内存空间 */
+
 	// Free Identity Page Table
+    // 释放身份页表（Identity Page Table）。
 	MmFreeContiguousMemory(EptState->EptPageTable);
 
 	// Free EptState
+    // 释放EptState（扩展页表状态）。
 	ExFreePoolWithTag(EptState, POOLTAG);
 
 	// Free the Pool manager
+    // 释放池管理器（Pool manager）。
 	PoolManagerUninitialize();
 	
 }
 
 /* The broadcast function which terminate the guest. */
+/* 终止客户端的广播函数。 */
 VOID HvDpcBroadcastTerminateGuest(KDPC* Dpc, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2)
 {	
 	// Terminate Vmx using Vmcall
+    // 使用Vmcall终止Vmx。
 	if (!VmxTerminate())
 	{
 		// Not serving IOCTL Here, so use DbgPrint
+        // 在此处不提供IOCTL服务，因此使用DbgPrint。
 		DbgPrint("There were an error terminating Vmx");
 		DbgBreakPoint();
 	}
 	
 	// Wait for all DPCs to synchronize at this point
+    // 在此处等待所有的延迟处理程序（DPC）同步。
 	KeSignalCallDpcSynchronize(SystemArgument2);
 
 	// Mark the DPC as being complete
+    // 将延迟处理程序（DPC）标记为已完成。
 	KeSignalCallDpcDone(SystemArgument1);
 }
 
 /* Set the monitor trap flag */
+/* 设置监视陷阱标志（monitor trap flag） */
 VOID HvSetMonitorTrapFlag(BOOLEAN Set)
 {
 	ULONG CpuBasedVmExecControls = 0;
 
 	// Read the previous flag
+    // 读取先前的标志位（flag）
 	__vmx_vmread(CPU_BASED_VM_EXEC_CONTROL, &CpuBasedVmExecControls);
 
 	if (Set) {
@@ -605,10 +622,12 @@ VOID HvSetMonitorTrapFlag(BOOLEAN Set)
 	}
 
 	// Set the new value 
+	// 设置新的值
 	__vmx_vmwrite(CPU_BASED_VM_EXEC_CONTROL, CpuBasedVmExecControls);
 }
 
 /* Reset GDTR/IDTR and other old when you do vmxoff as the patchguard will detect them left modified */
+/* 当执行vmxoff时，重置GDTR/IDTR和其他旧值，因为PatchGuard会检测到它们被修改了。 */
 VOID HvRestoreRegisters()
 {
 	ULONG64 FsBase;
@@ -619,20 +638,24 @@ VOID HvRestoreRegisters()
 	ULONG64 IdtrLimit;
 
 	// Restore FS Base 
+	// 恢复FS基址（FS Base）。
 	__vmx_vmread(GUEST_FS_BASE, &FsBase);
 	__writemsr(MSR_FS_BASE, FsBase);
 
 	// Restore Gs Base
+    // 恢复GS基址（GS Base）。
 	__vmx_vmread(GUEST_GS_BASE, &GsBase);
 	__writemsr(MSR_GS_BASE, GsBase);
 
 	// Restore GDTR
+    // 恢复GDTR（全局描述符表寄存器）。
 	__vmx_vmread(GUEST_GDTR_BASE, &GdtrBase);
 	__vmx_vmread(GUEST_GDTR_LIMIT, &GdtrLimit);
 
 	AsmReloadGdtr(GdtrBase, GdtrLimit);
 
 	// Restore IDTR
+    // 恢复IDTR（中断描述符表寄存器）。
 	__vmx_vmread(GUEST_IDTR_BASE, &IdtrBase);
 	__vmx_vmread(GUEST_IDTR_LIMIT, &IdtrLimit);
 
@@ -640,33 +663,42 @@ VOID HvRestoreRegisters()
 }
 
 /* The broadcast function which removes all the hooks and invalidate TLB. */
+/* 移除所有的钩子并使TLB失效的广播函数。 */
 VOID HvDpcBroadcastRemoveHookAndInvalidateAllEntries(KDPC* Dpc, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2)
 {
 	// Execute the VMCALL to remove the hook and invalidate
+    // 执行VMCALL以移除钩子并使其失效。
 	AsmVmxVmcall(VMCALL_UNHOOK_ALL_PAGES, NULL, NULL, NULL);
 
 	// Wait for all DPCs to synchronize at this point
+    // 在此处等待所有的延迟处理程序（DPC）同步。
 	KeSignalCallDpcSynchronize(SystemArgument2);
 
 	// Mark the DPC as being complete
+    // 将延迟处理程序（DPC）标记为已完成。
 	KeSignalCallDpcDone(SystemArgument1);
 }
 
 /* The broadcast function which removes the single hook and invalidate TLB. */
+/* 移除单个钩子并使TLB失效的广播函数。 */
 VOID HvDpcBroadcastRemoveHookAndInvalidateSingleEntry(KDPC* Dpc, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2)
 {
 	// Execute the VMCALL to remove the hook and invalidate
+    // 执行VMCALL以移除钩子并使其失效。
 	AsmVmxVmcall(VMCALL_UNHOOK_SINGLE_PAGE, DeferredContext, NULL, NULL);
 
 	// Wait for all DPCs to synchronize at this point
+    // 在此处等待所有的延迟处理程序（DPC）同步。
 	KeSignalCallDpcSynchronize(SystemArgument2);
 
 	// Mark the DPC as being complete
+    // 将延迟处理程序（DPC）标记为已完成。
 	KeSignalCallDpcDone(SystemArgument1);
 }
 
 
 /* Remove single hook from the hooked pages list and invalidate TLB */
+/* 从钩住页面列表中移除单个钩子并使TLB失效 */
 BOOLEAN HvPerformPageUnHookSinglePage(UINT64 VirtualAddress) {
 	PLIST_ENTRY TempList = 0;
 	SIZE_T PhysicalAddress;
@@ -674,6 +706,7 @@ BOOLEAN HvPerformPageUnHookSinglePage(UINT64 VirtualAddress) {
 	PhysicalAddress = PAGE_ALIGN(VirtualAddressToPhysicalAddress(VirtualAddress));
 
 	// Should be called from vmx non-root
+    // 应该从vmx非根模式下调用。
 	if (GuestState[KeGetCurrentProcessorNumber()].IsOnVmxRootMode)
 	{
 		return FALSE;
@@ -688,30 +721,38 @@ BOOLEAN HvPerformPageUnHookSinglePage(UINT64 VirtualAddress) {
 		if (HookedEntry->PhysicalBaseAddress == PhysicalAddress)
 		{
 			// Remove it in all the cores
+            // 在所有核心中移除它。
 			KeGenericCallDpc(HvDpcBroadcastRemoveHookAndInvalidateSingleEntry, HookedEntry->PhysicalBaseAddress);
 
 			// remove the entry from the list
+            // 从列表中移除该条目。
 			RemoveEntryList(HookedEntry->PageHookList.Flink);
 
 			return TRUE;
 		}
 	}
 	// Nothing found , probably the list is not found
+    // 未找到任何内容，可能列表不存在。
 	return FALSE;
 }
 
 /* Remove all hooks from the hooked pages list and invalidate TLB */
 // Should be called from Vmx Non-root
+/* 从钩住页面列表中移除所有钩子并使TLB失效 */
+// 应该从Vmx非根模式下调用。
 VOID HvPerformPageUnHookAllPages() {
 
 	// Should be called from vmx non-root
+    // 应该从vmx非根模式下调用。
 	if (GuestState[KeGetCurrentProcessorNumber()].IsOnVmxRootMode)
 	{
 		return;
 	}
 
 	// Remove it in all the cores
+    // 在所有核心中移除它。
 	KeGenericCallDpc(HvDpcBroadcastRemoveHookAndInvalidateAllEntries, 0x0);
 
 	// No need to remove the list as it will automatically remove by the pool uninitializer
+    // 不需要手动移除列表，因为它将在池反初始化时自动移除。
 }
