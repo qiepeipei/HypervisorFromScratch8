@@ -138,6 +138,7 @@ UINT64 PoolManagerRequestPool(POOL_ALLOCATION_INTENTION Intention, BOOLEAN Reque
 // 此函数不需要锁定，因为它只在PASSIVE_LEVEL下调用一次
 BOOLEAN PoolManagerAllocateAndAddToPoolTable(SIZE_T Size, UINT32 Count, POOL_ALLOCATION_INTENTION Intention)
 {
+    BOOLEAN is_finish = TRUE;
 	/* If we're here then we're in vmx non-root */
     /* 如果我们在这里，则处于vmx非根模式 */
 	for (size_t i = 0; i < Count; i++)
@@ -147,7 +148,8 @@ BOOLEAN PoolManagerAllocateAndAddToPoolTable(SIZE_T Size, UINT32 Count, POOL_ALL
 		if (!SinglePool)
 		{
 			LogError("Insufficient memory");
-			return FALSE;
+            is_finish = FALSE;
+            break;
 		}
 
 		RtlZeroMemory(SinglePool, sizeof(POOL_TABLE));
@@ -159,7 +161,8 @@ BOOLEAN PoolManagerAllocateAndAddToPoolTable(SIZE_T Size, UINT32 Count, POOL_ALL
 		if (!SinglePool->Address)
 		{
 			LogError("Insufficient memory");
-			return FALSE;
+            is_finish = FALSE;
+            break;
 		}
 
 		RtlZeroMemory(SinglePool->Address, Size);
@@ -175,6 +178,7 @@ BOOLEAN PoolManagerAllocateAndAddToPoolTable(SIZE_T Size, UINT32 Count, POOL_ALL
 
 	}
 
+    return is_finish;
 }
 
 

@@ -18,6 +18,7 @@ BOOLEAN VmxInitializer()
 	int ProcessorCount;
 	KAFFINITY AffinityMask;
 
+	//检查cpu是否支持vt和主板bios是否开启支持vt
 	if (!HvIsVmxSupported())
 	{
 		LogError("VMX is not supported in this machine !");

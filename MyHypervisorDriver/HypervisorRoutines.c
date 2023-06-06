@@ -20,7 +20,7 @@ BOOLEAN HvVmxInitialize()
 
 	/*** Start Virtualizing Current System ***/
     /*** 开始对当前系统进行虚拟化 ***/
-
+	
 	// Initiating EPTP and VMX
     // 初始化EPTP（扩展页表指针）和VMX（虚拟机扩展）
 	if (!VmxInitializer())
@@ -113,7 +113,8 @@ BOOLEAN HvIsVmxSupported()
 ULONG HvAdjustControls(ULONG Ctl, ULONG Msr)
 {
 	MSR MsrValue = { 0 };
-
+    //高位 = 除要设置的位以外都设置为0
+    //低位 = 直接使用指定MSR的低位
 	MsrValue.Content = __readmsr(Msr);
 	Ctl &= MsrValue.High;     /* bit == 0 in high word ==> must be zero */ /* 高字中的位等于0 ==> 必须为零 */
 	Ctl |= MsrValue.Low;      /* bit == 1 in low word  ==> must be one  */ /* 低字中的位等于1 ==> 必须为一 */

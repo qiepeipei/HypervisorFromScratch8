@@ -140,6 +140,7 @@ NTSTATUS DrvCreate(PDEVICE_OBJECT DeviceObject, PIRP Irp)
     /* 由于我们要支持通过 CreateFile 进行多次初始化，我们必须再次将 GuestState 清零 */
 	ProcessorCount = KeQueryActiveProcessorCount(0);
 	// Zero memory
+    // 将内存清零
 	RtlZeroMemory(GuestState, sizeof(VIRTUAL_MACHINE_STATE) * ProcessorCount);
 
 
